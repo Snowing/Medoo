@@ -40,6 +40,7 @@ class medoo
 	protected $logs = array();
 
 	protected $debug_mode = false;
+    protected $ignore_datamap = false;
 
 	public function __construct($options = null)
 	{
@@ -195,7 +196,7 @@ class medoo
 
 	protected function column_quote($string)
 	{
-		preg_match('/(\(JSON\)\s*|^#)?([a-zA-Z0-9_]*)\.([a-zA-Z0-9_]*)/', $string, $column_match);
+		preg_match('/(\(JSON\)\s*|^#)?([a-zA-Z0-9_]*)\.([a-zA-Z0-9_*]*)/', $string, $column_match);
 
 		if (isset($column_match[ 2 ], $column_match[ 3 ]))
 		{
@@ -762,6 +763,12 @@ class medoo
 			return $query->fetchAll(PDO::FETCH_COLUMN);
 		}
 
+		if ($this->ignore_datamap)
+        {
+            $this->ignore_datamap = false;
+            return $query->fetchAll(PDO::FETCH_ASSOC);
+        }
+
 		while ($row = $query->fetch(PDO::FETCH_ASSOC))
 		{
 			foreach ($columns as $key => $value)
@@ -1078,6 +1085,11 @@ class medoo
 
 		return $this;
 	}
+
+	public function ignoreDataMap(){
+	    $this->ignore_datamap = true;
+        return $this;
+    }
 
 	public function error()
 	{
