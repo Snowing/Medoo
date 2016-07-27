@@ -43,6 +43,8 @@ class medoo
 
     protected $debug_mode = false;
     protected $ignore_datamap = false;
+    protected $query_exceptions = false;
+    protected $query_exceptions_mode = false;
 
     public function __construct($options = null)
     {
@@ -153,7 +155,17 @@ class medoo
 
         $this->logs[] = $query;
 
-        return $this->pdo->query($query);
+        if ($this->query_exceptions) {
+            $this->query_exceptions = $this->query_exceptions_mode;
+            $res = $this->pdo->query($query);
+            if ($res === false) {
+                throw new Exception($this->error()[2]);
+            }
+            return $res;
+        } else {
+            $this->query_exceptions = $this->query_exceptions_mode;
+            return $this->pdo->query($query);
+        }
     }
 
     public function exec($query)
@@ -188,6 +200,7 @@ class medoo
         if (isset($column_match[2], $column_match[3])) {
             return '"' . $this->prefix . $column_match[2] . '"."' . $column_match[3] . '"';
         }
+
 
         return '"' . $string . '"';
     }
@@ -923,6 +936,12 @@ class medoo
     public function ignoreDataMap()
     {
         $this->ignore_datamap = true;
+        return $this;
+    }
+
+    public function query_exceptions($mode)
+    {
+        $this->query_exceptions = $mode;
         return $this;
     }
 
