@@ -135,6 +135,11 @@ class medoo
                 $this->option
             );
 
+
+            if ($type == 'mysql') {
+                $this->pdo->setAttribute(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, false);
+            }
+
             foreach ($commands as $value) {
                 $this->pdo->exec($value);
             }
@@ -636,7 +641,7 @@ class medoo
         }
     }
 
-    public function select($table, $join, $columns = null, $where = null)
+    public function selectAll($table, $join, $columns = null, $where = null)
     {
         $column = $where == null ? $join : $columns;
 
@@ -678,6 +683,12 @@ class medoo
         }
 
         return $stack;
+    }
+
+    public function select($table, $join, $columns = null, $where = null)
+    {
+        $query = $this->query($this->select_context($table, $join, $columns, $where));
+        return $query;
     }
 
     public function insert($table, $datas)
