@@ -185,7 +185,17 @@ class medoo
 
         $this->logs[] = $query;
 
-        return $this->pdo->exec($query);
+        if ($this->query_exceptions) {
+            $this->query_exceptions = $this->query_exceptions_mode;
+            $res = $this->pdo->exec($query);
+            if ($res === false) {
+                throw new Exception($this->error()[2]);
+            }
+            return $res;
+        } else {
+            $this->query_exceptions = $this->query_exceptions_mode;
+            return $this->pdo->exec($query);
+        }
     }
 
     public function quote($string)
